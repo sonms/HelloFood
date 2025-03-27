@@ -82,7 +82,7 @@ object PreferenceDataStore {
         }
 
     //알람 설정 저장
-    suspend fun setAlarmEnabled(context: Context, isEnabled: Boolean) {
+    /*suspend fun setAlarmEnabled(context: Context, isEnabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[ALARM_SETTING_KEY] = isEnabled
             if (isEnabled) {
@@ -91,5 +91,5 @@ object PreferenceDataStore {
                 AlarmHelper(context).cancelAllAlarms()
             }
         }
-    }
+    }*/
 }
