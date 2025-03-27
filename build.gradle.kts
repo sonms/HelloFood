@@ -7,11 +7,14 @@ plugins {
     id("com.google.dagger.hilt.android") version "2.52" apply false
     id("org.jetbrains.kotlin.jvm") version "1.9.23"
     id("com.google.devtools.ksp") version "1.9.23-1.0.20"
+
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0" // 최신 Compose Compiler 플러그인 추가
 }
 buildscript {
     //ext.hilt_version = "2.52"
     dependencies {
         classpath("com.google.dagger:hilt-android-gradle-plugin:2.52")
+        classpath("com.google.gms:google-services:4.3.1")
         classpath("com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1")
     }
 }
