@@ -1,7 +1,6 @@
 package com.purang.hellofood
 
 import android.os.Build
-import com.purang.hellofood.BuildConfig
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,6 +22,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -54,14 +54,22 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.purang.hellofood.ui.theme.HelloFoodTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import com.purang.hellofood.ui.theme.blueColor5
 import com.purang.hellofood.ui.theme.blueColor7
+import com.purang.hellofood.ui.theme.mintColor4
+import com.purang.hellofood.ui.theme.mintColor5
+import com.purang.hellofood.ui.theme.mintColor6
+import com.purang.hellofood.ui.theme.mintColor7
 import com.purang.hellofood.utils.FontSize
 import com.purang.hellofood.utils.PreferenceDataStore
+import com.purang.hellofood.views.DetailScreen
+import com.purang.hellofood.views.calendar.CalendarScreen
+import com.purang.hellofood.views.home.HomeScreen
 import com.purang.hellofood.views.loading.GlobalLoadingScreen
 
 sealed class BottomNavItem(
@@ -233,7 +241,7 @@ fun BottomNavigation(navController: NavController) {
                                     restoreState = true
                                 }
                             },
-                            containerColor = blueColor5,
+                            containerColor = mintColor4,
                             modifier = Modifier
                                 .wrapContentSize()
                                 .offset(y = (-10).dp),
@@ -285,8 +293,8 @@ fun BottomNavigation(navController: NavController) {
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = blueColor7,
-                            selectedTextColor = blueColor5
+                            selectedIconColor = mintColor5,
+                            selectedTextColor = mintColor5
                         )
                     )
                 }
@@ -336,6 +344,8 @@ fun TopAppBar(
                     modifier = Modifier.padding(start = 5.dp),
                     style = FontUtils.getTextStyle(fontSize.size + 2f)
                 )
+
+                Divider(modifier = Modifier.fillMaxWidth(), thickness = 1.dp, color = Color.Gray)
             }
         },
         actions = {
@@ -368,10 +378,10 @@ fun TopAppBar(
 fun NavigationGraph(navController: NavHostController) {
     NavHost(navController = navController, startDestination = BottomNavItem.Home.screenRoute) {
         composable(BottomNavItem.Home.screenRoute) {
-
+            HomeScreen(navController)
         }
         composable(BottomNavItem.Calendar.screenRoute) {
-
+            CalendarScreen(navController)
         }
         composable(BottomNavItem.Saved.screenRoute) {
 
@@ -381,6 +391,16 @@ fun NavigationGraph(navController: NavHostController) {
         }
         composable(BottomNavItem.Account.screenRoute) {
             //InterestSelectionScreen(navController)
+        }
+        composable(
+            route = "detail?schedule={id}",
+            arguments = listOf(
+                navArgument("id") { defaultValue = "-1" }
+            )
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getString("id") ?: "-1"
+
+            DetailScreen(navController, id = id)
         }
 
         /*composable(
@@ -408,6 +428,7 @@ fun NavigationGraph(navController: NavHostController) {
         }*/
     }
 }
+
 
 private object NoRippleInteractionSource : MutableInteractionSource {
     override val interactions: Flow<Interaction> = emptyFlow()
