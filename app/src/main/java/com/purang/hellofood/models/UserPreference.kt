@@ -8,7 +8,8 @@ import java.time.LocalDateTime
 @RequiresApi(Build.VERSION_CODES.O)
 data class UserPreference(
     val preferenceId: Int,
-    val userId: Int,
+    val userId: String,
+    val userEmail : String,
     val preferredFood: String?,
     val dislikedFood: String?,
     val allergies: String?,

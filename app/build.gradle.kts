@@ -62,7 +62,8 @@ dependencies {
     //hiltViewModel
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation("com.google.dagger:hilt-android:2.52")
-    implementation("com.google.ai.client.generativeai:generativeai:0.9.0") // 최신 버전으로 수정
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+    implementation("com.google.firebase:firebase-auth-ktx:23.2.0") // 최신 버전으로 수정
     kapt("com.google.dagger:hilt-compiler:2.52")
 
     //livedata

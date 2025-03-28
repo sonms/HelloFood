@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 @RequiresApi(Build.VERSION_CODES.O)
 data class FoodLog (
     val foodId: Int,
-    val userId: Int,
+    val userId: String,
     val photoUrl: String?,
     val foodName: String,
     val calories: Float,

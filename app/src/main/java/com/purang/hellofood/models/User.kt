@@ -1,7 +1,8 @@
 package com.purang.hellofood.models
 
 data class User(
-    val userId: Int,
+    val userId: String,
+    val userEmail : String,
     val name: String,
     val age: Int,
     val gender: String, // "남", "여", "기타"

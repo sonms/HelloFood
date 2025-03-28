@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 @RequiresApi(Build.VERSION_CODES.O)
 data class AgricultureRecommendation (
     val recommendationId: Int,
-    val userId: Int,
+    val userId: String,
     val productName: String,
     val category: String, // "채소", "과일", "곡물"
     val nutritionalValue: String?,

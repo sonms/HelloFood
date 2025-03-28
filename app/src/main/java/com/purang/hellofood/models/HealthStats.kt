@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 @RequiresApi(Build.VERSION_CODES.O)
 data class HealthStats (
     val statsId: Int,
-    val userId: Int,
+    val userId: String,
     val date: String, // YYYY-MM-DD
     val steps: Int?,
     val caloriesBurned: Float?,
