@@ -5,6 +5,7 @@ import com.google.ai.client.generativeai.type.content
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 
+/*
 @HiltViewModel
 class GeminiViewModel @Inject constructor(
 
@@ -13,10 +14,12 @@ class GeminiViewModel @Inject constructor(
         generateContent(content { text(prompt) }.toString())
 
 
-    /*suspend fun generateContent(vararg prompt: Content): GenerateContentResponse =
+    */
+/*suspend fun generateContent(vararg prompt: Content): GenerateContentResponse =
         try {
             controller.generateContent(constructRequest(*prompt)).toPublic().validate()
         } catch (e: Throwable) {
             throw GoogleGenerativeAIException.from(e)
-        }*/
-}
+        }*//*
+
+}*/

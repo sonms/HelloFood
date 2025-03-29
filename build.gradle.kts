@@ -14,7 +14,7 @@ buildscript {
     //ext.hilt_version = "2.52"
     dependencies {
         classpath("com.google.dagger:hilt-android-gradle-plugin:2.52")
-        classpath("com.google.gms:google-services:4.3.1")
+        classpath("com.google.gms:google-services:4.3.3")
         classpath("com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1")
     }
 }

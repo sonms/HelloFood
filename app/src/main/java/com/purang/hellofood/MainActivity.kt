@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -331,20 +332,23 @@ fun TopAppBar(
     androidx.compose.material3.TopAppBar(
         modifier = Modifier.wrapContentSize(),
         title = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+            Column (
+                modifier = Modifier.fillMaxWidth().wrapContentHeight()
             ) {
-                // Title: what2c
-                Text(
-                    text = "HelloFood",
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Start,
-                    modifier = Modifier.padding(start = 5.dp),
-                    style = FontUtils.getTextStyle(fontSize.size + 2f)
-                )
-
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Title: what2c
+                    Text(
+                        text = "HelloFood",
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier.padding(start = 5.dp),
+                        style = FontUtils.getTextStyle(fontSize.size + 2f)
+                    )
+                }
                 Divider(modifier = Modifier.fillMaxWidth(), thickness = 1.dp, color = Color.Gray)
             }
         },

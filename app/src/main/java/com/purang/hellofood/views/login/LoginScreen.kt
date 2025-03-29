@@ -51,7 +51,7 @@ fun LoginScreen(
     val request = CredentialManagerProvider.getCredentialRequest()
 
     val painter = rememberAsyncImagePainter(
-        model = "R.drawable.android_light_sq_SU.svg" // SVG 파일 경로
+        model = "R.drawable.android_light_sq_su_4x.png" // SVG 파일 경로
     )
 
     Button(

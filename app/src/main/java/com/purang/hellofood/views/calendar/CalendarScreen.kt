@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -162,19 +163,21 @@ fun CalendarScreen(
         LoadingState.hide()
     }
 
-    Column (
+    Column(
         modifier = Modifier.fillMaxSize().padding(10.dp)
     ) {
-        LazyColumn {
+        LazyColumn(
+            modifier = Modifier.wrapContentSize()
+        ) {
             item {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .animateContentSize() // 애니메이션을 적용
+                        .fillParentMaxHeight()// 명시적으로 높이를 설정합니다.
                 ) {
-                    if (!isCollapsed) {  // 스크롤을 내려서 접혀있는 상태에서는 표시 안 함
+                    if (!isCollapsed) { // 스크롤을 내려서 접혀있는 상태에서는 표시 안 함
                         ScheduleCalendar(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.fillMaxWidth(), // 🔥 fillMaxSize() → fillMaxWidth() 변경
                             initialDate = ScheduleDate.create(YearMonth.now().year, YearMonth.now().monthValue, 1),
                             schedules = calendarList,
                             isMondayFirst = false,
