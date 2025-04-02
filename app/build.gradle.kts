@@ -81,6 +81,9 @@ dependencies {
     //coil
     implementation("io.coil-kt:coil-compose:2.7.0")
 
+    //permission accompanist
+    implementation("com.google.accompanist:accompanist-permissions:0.37.0")
+
     //구글로그인
     implementation ("com.google.android.gms:play-services-auth:20.4.1")
 
