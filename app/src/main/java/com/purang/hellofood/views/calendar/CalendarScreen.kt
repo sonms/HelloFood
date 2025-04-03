@@ -179,7 +179,10 @@ fun CalendarScreen(
                                     val formattedMonth = String.format(Locale.getDefault(), "%02d", selectedDate.month)
                                     val formattedDate = String.format(Locale.getDefault(), "%02d", selectedDate.date)
                                     selectDate = "${selectedDate.year}-$formattedMonth-$formattedDate"
+
+                                    navController.navigate("list?date=${selectDate}")
                                 },
+
                                 onPageChanged = { pageDate ->
                                     val formattedMonth = String.format(Locale.getDefault(), "%02d", pageDate.month)
                                     pageChangeDate = "${pageDate.year}-$formattedMonth"
