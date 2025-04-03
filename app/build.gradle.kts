@@ -85,7 +85,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-permissions:0.37.0")
 
     //구글로그인
-    implementation ("com.google.android.gms:play-services-auth:20.4.1")
+    implementation ("com.google.android.gms:play-services-auth:21.3.0")
 
     val credential = "1.5.0" // 안정화 버전
     val googleId = "1.1.1"
@@ -98,7 +98,7 @@ dependencies {
 
     //firebase
     implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation(platform("com.google.firebase:firebase-bom:33.11.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
 
     //calendar
     implementation ("com.github.uuranus:schedule-calendar-compose:1.0.3")

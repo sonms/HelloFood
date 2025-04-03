@@ -14,6 +14,9 @@ data class FoodLog (
     val carbohydrates: Float,
     val proteins: Float,
     val fats: Float,
+    val vitamin : Float,
+    val mineral : Float,
+    val water : Int,
     val mealTime: String, // "아침", "점심", "저녁", "간식"
     val createdAt: LocalDateTime = LocalDateTime.now()
 )

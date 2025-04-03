@@ -9,7 +9,7 @@ data class HealthStats (
     val statsId: Int,
     val userId: String,
     val date: String, // YYYY-MM-DD
-    val steps: Int?,
+    val water : Int,
     val caloriesBurned: Float?,
     val exerciseMinutes: Int?,
     val sleepHours: Float?,
