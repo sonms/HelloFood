@@ -2,33 +2,33 @@ package com.purang.hellofood.views.login
 
 import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialResponse
+import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.google.android.gms.common.SignInButton
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.purang.hellofood.BottomNavItem
-import com.purang.hellofood.BottomNavigation
 import com.purang.hellofood.R
+import com.purang.hellofood.ui.theme.greenFoodColor2
 import com.purang.hellofood.utils.CredentialManagerProvider
+import com.purang.hellofood.utils.PreferenceDataStore
 import com.purang.hellofood.viewmodels.LoginViewModel
 import kotlinx.coroutines.launch
 
@@ -42,73 +42,113 @@ sealed class ApiState {
 @Composable
 fun LoginScreen(
     navController: NavController,
-    viewModel: LoginViewModel = hiltViewModel()
 ) {
-    //val loginState by viewModel.loginApiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val credentialManager = CredentialManagerProvider.getCredentialManager(context)
     val request = CredentialManagerProvider.getCredentialRequest()
+    //Log.d("Login", "Credential Request: $request")
+    val loginStateManager by StateManager.isLoggedIn
 
-    val painter = rememberAsyncImagePainter(
-        model = "R.drawable.android_light_sq_su_4x.png" // SVG 파일 경로
-    )
-
-    Button(
-        onClick = {
-            coroutineScope.launch {
-                /*try {
-
-                } catch (e : ) {
-                    handleFailure()
-                }*/
-                val result = credentialManager.getCredential(
-                    context, request
-                )
-                handleSignIn(result, navController)
+    var loginState by remember { mutableStateOf<ApiState>(ApiState.Idle) }
+    LaunchedEffect(loginStateManager) {
+        if (loginStateManager) {
+            navController.navigate(BottomNavItem.Home.screenRoute) {
+                popUpTo(0) { inclusive = true }  // 뒤로가기 방지
             }
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp),
-        shape = RoundedCornerShape(6.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Black,
-            contentColor = Color.White
-        )
-    ) {
-        Image(
-            painter = painter,//painterResource(id = R.drawable.ic_logo_google),
-            contentDescription = "google logo"
-        )
-        Text(text = "Sign in with Google", modifier = Modifier.padding(6.dp))
+        }
     }
 
-    /*when (loginState) {
-        is ApiState.Loading -> Text("로그인 중...")
-        is ApiState.Success -> Text("로그인 성공!")
-        is ApiState.Error -> Text("로그인 실패: ${(viewModel.loginApiState as ApiState.Error).message}")
-        else -> {}
-    }*/
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.hello_food_logo),
+            contentDescription = "HelloFood Logo",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+                .padding(bottom = 16.dp)
+        )
+
+        Text(
+            text = "HelloFood에 오신 것을 환영합니다!",
+            fontSize = 20.sp,
+            color = greenFoodColor2,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        // Google 로그인 버튼
+        Image(
+            painter = rememberAsyncImagePainter(model = R.drawable.android_light_sq_su_4x),
+            contentDescription = "Google Sign In",
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .clickable {
+                    coroutineScope.launch {
+                        loginState = ApiState.Loading
+                        try {
+                            val result = credentialManager.getCredential(context, request)
+                            Log.d("Login", "로그인 성공: ${result.credential}")
+
+                            handleSignIn(result, navController) {
+                                loginState = ApiState.Success("로그인 성공!")
+                            }
+                        } catch (e: GetCredentialCancellationException) {
+                            Log.e("Login", "사용자가 로그인 창을 닫았습니다.")
+                            loginState = ApiState.Error("로그인이 취소되었습니다.")
+                        } catch (e: Exception) {
+                            Log.e("Login Error", "로그인 실패", e)
+                            loginState = ApiState.Error("로그인 실패: ${e.message}")
+                        }
+                    }
+                }
+        )
+
+        when (loginState) {
+            is ApiState.Loading -> CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp))
+            is ApiState.Success -> Text("로그인 성공!", color = Color.Green, modifier = Modifier.padding(top = 16.dp))
+            is ApiState.Error -> Text("로그인 실패: ${(loginState as ApiState.Error).message}", color = Color.Red, modifier = Modifier.padding(top = 16.dp))
+            else -> {}
+        }
+    }
 }
 
-
-private fun handleSignIn(result : GetCredentialResponse, navController: NavController) {
+private fun handleSignIn(
+    result: GetCredentialResponse,
+    navController: NavController,
+    onSuccess: () -> Unit
+) {
     val auth = Firebase.auth
     when (val credential = result.credential) {
         is CustomCredential -> {
+            Log.d("Login", "받은 Credential 타입: ${credential.type}")
             if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                 val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
                 val idToken = googleIdTokenCredential.idToken
                 val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
+
                 auth.signInWithCredential(firebaseCredential).addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        navController.navigate(BottomNavItem.Home.screenRoute)
+                        Log.d("Login", "Firebase 로그인 성공")
+                        onSuccess()
+                        /*navController.navigate(BottomNavItem.Home.screenRoute) {
+                            popUpTo("login") { inclusive = true }
+                        }*/
+                        StateManager.login()
                     } else {
-                        Log.e("task error", task.exception.toString())
+                        Log.e("Login Error", "Firebase 로그인 실패: ${task.exception?.message}")
                     }
                 }
             }
+        }
+        else -> {
+            Log.e("Login Error", "알 수 없는 Credential 타입: ${credential.javaClass.name}")
         }
     }
 }

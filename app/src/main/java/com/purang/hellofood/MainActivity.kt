@@ -2,6 +2,7 @@ package com.purang.hellofood
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -49,6 +50,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.purang.hellofood.utils.FontUtils
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -60,18 +63,24 @@ import com.purang.hellofood.ui.theme.HelloFoodTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
-import com.purang.hellofood.ui.theme.blueColor5
-import com.purang.hellofood.ui.theme.blueColor7
 import com.purang.hellofood.ui.theme.mintColor4
 import com.purang.hellofood.ui.theme.mintColor5
-import com.purang.hellofood.ui.theme.mintColor6
-import com.purang.hellofood.ui.theme.mintColor7
+import com.purang.hellofood.utils.FirebaseUserManager
 import com.purang.hellofood.utils.FontSize
 import com.purang.hellofood.utils.PreferenceDataStore
-import com.purang.hellofood.views.DetailScreen
-import com.purang.hellofood.views.calendar.CalendarScreen
+import com.purang.hellofood.viewmodels.GeminiViewModel
+import com.purang.hellofood.views.detail.DetailScreen
+import com.purang.hellofood.views.calendar.CalendarDataListScreen
+import com.purang.hellofood.views.camera.CameraScreen
+import com.purang.hellofood.views.camera.analysis.AnalysisScreen
 import com.purang.hellofood.views.home.HomeScreen
 import com.purang.hellofood.views.loading.GlobalLoadingScreen
+import com.purang.hellofood.views.login.LoginScreen
+import com.purang.hellofood.views.saved.SavedScreen
+import com.purang.hellofood.views.schedule.ScheduleScreen
+import com.purang.hellofood.views.schedule.edit.EditScreen
+import com.purang.hellofood.views.search.SearchScreen
+import com.purang.hellofood.views.statistics.personal.PersonalScreen
 
 sealed class BottomNavItem(
     val title: Int, val icon: Int, val screenRoute: String
@@ -85,7 +94,7 @@ sealed class BottomNavItem(
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -103,7 +112,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun MainContent() {
     val navController = rememberNavController()
@@ -132,14 +141,32 @@ fun MainContent() {
             // 특정 라우트에서는 BottomNavigation을 숨깁니다.
             if (currentRoute !in listOf(
                     "edit_financial?type={type}&id={id}",
-                    "edit_financial"
+                    "login",
+                    "analysis"
                 )
             ) {
                 BottomNavigation(navController = navController)
             }
         },
         topBar = {
-            TopAppBar(navController, fontSize)
+            if (currentRoute !in listOf(
+                    BottomNavItem.Saved.screenRoute,
+                    "edit?type={typeName}&scheduleId={id}",
+                    "analysis",
+                    "login",
+                    "personal",
+                    "search"
+                )
+            ) {
+                Column {
+                    TopAppBar(navController, fontSize)
+                    Divider(
+                        modifier = Modifier.fillMaxWidth(),
+                        thickness = 1.dp,
+                        color = Color.Gray
+                    )
+                }
+            }
         }
     ) {
         Box(Modifier.padding(it)) {
@@ -349,11 +376,14 @@ fun TopAppBar(
                         style = FontUtils.getTextStyle(fontSize.size + 2f)
                     )
                 }
-                Divider(modifier = Modifier.fillMaxWidth(), thickness = 1.dp, color = Color.Gray)
+                //Divider(modifier = Modifier.fillMaxWidth(), thickness = 1.dp, color = Color.Gray)
             }
         },
         actions = {
-            IconButton(onClick = { navController.navigate("search") }) {
+            IconButton(onClick = {
+                //Log.e("currentUser", FirebaseUserManager.currentUser.toString())
+                navController.navigate("search") }
+            ) {
                 Icon(Icons.Default.Search, contentDescription = "Search")
             }
         }
@@ -377,21 +407,39 @@ fun TopAppBar(
     }*/
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun NavigationGraph(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = BottomNavItem.Home.screenRoute) {
+    val context = LocalContext.current
+    val isLoggedIn by PreferenceDataStore.getLoginState(context).collectAsState(initial = false)
+    val geminiViewModel: GeminiViewModel = hiltViewModel()
+
+    NavHost(
+        navController = navController,
+        //startDestination = BottomNavItem.Home.screenRoute
+        startDestination = if (isLoggedIn) BottomNavItem.Home.screenRoute else "login"
+    ) {
+        composable("login") {
+            LoginScreen(navController)
+        }
+        composable("search") {
+            SearchScreen(navController)
+        }
+        composable("personal") {
+            PersonalScreen(navController)
+        }
+
         composable(BottomNavItem.Home.screenRoute) {
             HomeScreen(navController)
         }
         composable(BottomNavItem.Calendar.screenRoute) {
-            CalendarScreen(navController)
+            ScheduleScreen(navController)
         }
         composable(BottomNavItem.Saved.screenRoute) {
-
+            SavedScreen(navController)
         }
         composable(BottomNavItem.Camera.screenRoute) {
-            //CalendarScreen(navController, homeViewModel)
+            CameraScreen(navController, geminiViewModel)
         }
         composable(BottomNavItem.Account.screenRoute) {
             //InterestSelectionScreen(navController)
@@ -406,6 +454,35 @@ fun NavigationGraph(navController: NavHostController) {
 
             DetailScreen(navController, id = id)
         }
+        composable(
+            route = "edit?type={typeName}&scheduleId={id}",
+            arguments = listOf(
+                navArgument("typeName") { defaultValue = "default" },
+                navArgument("id") { defaultValue = "-1" }
+            )
+        ) { backStackEntry ->
+            val typeName = backStackEntry.arguments?.getString("typeName") ?: "default"
+            val scheduleId = backStackEntry.arguments?.getString("id") ?: "-1"
+
+            EditScreen(navController, type = typeName, scheduleId = scheduleId)
+        }
+        composable(
+            route = "list?date={selectDate}",
+            arguments = listOf(
+                navArgument("selectDate") { defaultValue = "" },
+            )
+        ) { backStackEntry ->
+            val selectDate = backStackEntry.arguments?.getString("selectDate") ?: "default"
+
+            CalendarDataListScreen(navController, selectedDate = selectDate)
+        }
+        composable("analysis") {
+            AnalysisScreen(navController = navController, geminiViewModel)
+        }
+
+
+
+
 
         /*composable(
             route = "edit_financial?type={type}&id={id}",

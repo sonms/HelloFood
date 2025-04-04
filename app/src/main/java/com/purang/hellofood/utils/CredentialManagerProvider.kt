@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.purang.hellofood.BuildConfig
 
 object CredentialManagerProvider {
     private lateinit var credentialManager: CredentialManager
@@ -11,7 +12,7 @@ object CredentialManagerProvider {
     fun getCredentialRequest(): GetCredentialRequest {
         val googleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
-            .setServerClientId("web_client_id")
+            .setServerClientId(BuildConfig.WEB_CLIENT_ID)
             .setAutoSelectEnabled(true)
             .build()
 
