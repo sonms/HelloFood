@@ -31,6 +31,16 @@ class ScheduleViewModel @Inject constructor(
 
     private val _userId = MutableLiveData<String>()
 
+    private val _schedule = MutableStateFlow<ScheduleData?>(null)
+    val schedule: StateFlow<ScheduleData?> = _schedule.asStateFlow()
+
+    //사용자와 스케줄id로 데이터 1개 가져오기
+    fun fetchSchedule(userId: String, scheduleId: String) {
+        viewModelScope.launch {
+            _schedule.value = scheduleRepository.getUserScheduleById(userId, scheduleId)
+        }
+    }
+
     // 사용자 ID와 선택한 월이 변경될 때마다 자동으로 데이터 가져오기
     @RequiresApi(Build.VERSION_CODES.O)
     val schedules: LiveData<List<ScheduleData>> = MediatorLiveData<List<ScheduleData>>().apply {
@@ -52,6 +62,8 @@ class ScheduleViewModel @Inject constructor(
         addSource(_userId) { update() }
         addSource(_selectedMonth) { update() }
     }
+
+
 
     /*private val _selectedMonth = MutableLiveData<YearMonth>()
 
@@ -104,7 +116,7 @@ class ScheduleViewModel @Inject constructor(
 
     fun deleteSchedule(scheduleId: String, userId: String) {
         viewModelScope.launch {
-            val success = scheduleRepository.deleteSchedule(scheduleId)
+            val success = scheduleRepository.deleteSchedule(userId, scheduleId)
             if (success) {
                 fetchSchedules(userId) // 일정 삭제 후 데이터 다시 불러오기
             }
