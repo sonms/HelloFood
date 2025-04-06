@@ -1,7 +1,9 @@
 package com.purang.hellofood.ui.theme
 
 import android.app.Activity
+import android.graphics.Color
 import android.os.Build
+import android.view.WindowInsets
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -57,8 +59,19 @@ fun HelloFoodTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) { // Android 15+
+                window.decorView.setOnApplyWindowInsetsListener { view, insets ->
+                    val statusBarInsets = insets.getInsets(WindowInsets.Type.statusBars())
+                    view.setBackgroundColor(Color.BLACK)
+
+                    // Adjust padding to avoid overlap
+                    view.setPadding(0, statusBarInsets.top, 0, 0)
+                    insets
+                }
+            } else {
+                // For Android 14 and below
+                window.statusBarColor = Color.BLACK
+            }
         }
     }
 

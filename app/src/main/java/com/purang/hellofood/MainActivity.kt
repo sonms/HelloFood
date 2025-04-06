@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.interaction.Interaction
@@ -69,6 +70,7 @@ import com.purang.hellofood.utils.FirebaseUserManager
 import com.purang.hellofood.utils.FontSize
 import com.purang.hellofood.utils.PreferenceDataStore
 import com.purang.hellofood.viewmodels.GeminiViewModel
+import com.purang.hellofood.views.account.AccountScreen
 import com.purang.hellofood.views.detail.DetailScreen
 import com.purang.hellofood.views.calendar.CalendarDataListScreen
 import com.purang.hellofood.views.camera.CameraScreen
@@ -80,7 +82,10 @@ import com.purang.hellofood.views.saved.SavedScreen
 import com.purang.hellofood.views.schedule.ScheduleScreen
 import com.purang.hellofood.views.schedule.edit.EditScreen
 import com.purang.hellofood.views.search.SearchScreen
+import com.purang.hellofood.views.statistics.exercise.ExerciseScreen
+import com.purang.hellofood.views.statistics.food_manage.FoodManageScreen
 import com.purang.hellofood.views.statistics.personal.PersonalScreen
+import com.purang.hellofood.views.statistics.rest.RestScreen
 
 sealed class BottomNavItem(
     val title: Int, val icon: Int, val screenRoute: String
@@ -97,6 +102,7 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //enableEdgeToEdge()
         setContent {
             HelloFoodTheme {
                 // A surface container using the 'background' color from the theme
@@ -155,7 +161,10 @@ fun MainContent() {
                     "analysis",
                     "login",
                     "personal",
-                    "search"
+                    "search",
+                    "exercise",
+                    "food",
+                    "rest"
                 )
             ) {
                 Column {
@@ -425,7 +434,23 @@ fun NavigationGraph(navController: NavHostController) {
         composable("search") {
             SearchScreen(navController)
         }
+        composable("analysis") {
+            AnalysisScreen(navController = navController, geminiViewModel)
+        }
+        composable("rest") {
+            RestScreen(navController)
+        }
+
         composable("personal") {
+            PersonalScreen(navController)
+        }
+        composable("exercise") {
+            ExerciseScreen(navController)
+        }
+        composable("food") {
+            FoodManageScreen(navController, geminiViewModel)
+        }
+        composable("rest") {
             PersonalScreen(navController)
         }
 
@@ -443,6 +468,7 @@ fun NavigationGraph(navController: NavHostController) {
         }
         composable(BottomNavItem.Account.screenRoute) {
             //InterestSelectionScreen(navController)
+            AccountScreen(navController)
         }
         composable(
             route = "detail?schedule={id}",
@@ -476,9 +502,7 @@ fun NavigationGraph(navController: NavHostController) {
 
             CalendarDataListScreen(navController, selectedDate = selectDate)
         }
-        composable("analysis") {
-            AnalysisScreen(navController = navController, geminiViewModel)
-        }
+
 
 
 

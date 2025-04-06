@@ -2,6 +2,7 @@ package com.purang.hellofood.views.login
 
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.credentials.CustomCredential
@@ -28,8 +30,10 @@ import com.purang.hellofood.BottomNavItem
 import com.purang.hellofood.R
 import com.purang.hellofood.ui.theme.greenFoodColor2
 import com.purang.hellofood.utils.CredentialManagerProvider
+import com.purang.hellofood.utils.FirebaseUserManager
 import com.purang.hellofood.utils.PreferenceDataStore
 import com.purang.hellofood.viewmodels.LoginViewModel
+import com.purang.hellofood.views.camera.analysis.saveFoodLogToFireStore
 import kotlinx.coroutines.launch
 
 sealed class ApiState {
@@ -59,62 +63,87 @@ fun LoginScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.hello_food_logo),
-            contentDescription = "HelloFood Logo",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
-                .padding(bottom = 16.dp)
-        )
+    Scaffold(
+        bottomBar = {
+            BottomAppBar(
+                modifier = Modifier.wrapContentHeight(),
+                containerColor = Color.Transparent,
+                contentColor = Color.White,
+                tonalElevation = 8.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.Transparent)
+                        .padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    // Google 로그인 버튼
+                    Image(
+                        painter = rememberAsyncImagePainter(model = R.drawable.android_light_sq_su_4x),
+                        contentDescription = "Google Sign In",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .clickable {
+                                coroutineScope.launch {
+                                    loginState = ApiState.Loading
+                                    try {
+                                        val result = credentialManager.getCredential(context, request)
+                                        Log.d("Login", "로그인 성공: ${result.credential}")
 
-        Text(
-            text = "HelloFood에 오신 것을 환영합니다!",
-            fontSize = 20.sp,
-            color = greenFoodColor2,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        // Google 로그인 버튼
-        Image(
-            painter = rememberAsyncImagePainter(model = R.drawable.android_light_sq_su_4x),
-            contentDescription = "Google Sign In",
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .clickable {
-                    coroutineScope.launch {
-                        loginState = ApiState.Loading
-                        try {
-                            val result = credentialManager.getCredential(context, request)
-                            Log.d("Login", "로그인 성공: ${result.credential}")
-
-                            handleSignIn(result, navController) {
-                                loginState = ApiState.Success("로그인 성공!")
+                                        handleSignIn(result, navController) {
+                                            loginState = ApiState.Success("로그인 성공!")
+                                        }
+                                    } catch (e: GetCredentialCancellationException) {
+                                        Log.e("Login", "사용자가 로그인 창을 닫았습니다.")
+                                        loginState = ApiState.Error("로그인이 취소되었습니다.")
+                                    } catch (e: Exception) {
+                                        Log.e("Login Error", "로그인 실패", e)
+                                        loginState = ApiState.Error("로그인 실패: ${e.message}")
+                                    }
+                                }
                             }
-                        } catch (e: GetCredentialCancellationException) {
-                            Log.e("Login", "사용자가 로그인 창을 닫았습니다.")
-                            loginState = ApiState.Error("로그인이 취소되었습니다.")
-                        } catch (e: Exception) {
-                            Log.e("Login Error", "로그인 실패", e)
-                            loginState = ApiState.Error("로그인 실패: ${e.message}")
-                        }
-                    }
+                    )
                 }
-        )
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(bottom = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.hello_food_logo),
+                    contentDescription = "HelloFood Logo",
+                )
+            }
 
-        when (loginState) {
-            is ApiState.Loading -> CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp))
-            is ApiState.Success -> Text("로그인 성공!", color = Color.Green, modifier = Modifier.padding(top = 16.dp))
-            is ApiState.Error -> Text("로그인 실패: ${(loginState as ApiState.Error).message}", color = Color.Red, modifier = Modifier.padding(top = 16.dp))
-            else -> {}
+
+            Spacer(modifier = Modifier.weight(1f))
+            /*Text(
+                text = "HelloFood에 오신 것을 환영합니다!",
+                fontSize = 20.sp,
+                color = greenFoodColor2,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )*/
+
+            when (loginState) {
+                is ApiState.Loading -> CircularProgressIndicator(modifier = Modifier.padding(top = 16.dp))
+                is ApiState.Success -> Text("로그인 성공!", color = Color.Green, modifier = Modifier.padding(top = 16.dp))
+                is ApiState.Error -> Text("로그인 실패: ${(loginState as ApiState.Error).message}", color = Color.Red, modifier = Modifier.padding(top = 16.dp))
+                else -> {}
+            }
         }
     }
 }
