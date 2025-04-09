@@ -80,7 +80,7 @@ fun StatisticsScreen (
     val restData by PreferenceDataStore.getRest(context).collectAsState(initial = 0)
 
     val foodData by foodLogViewModel.foodLogs.collectAsState(initial = emptyList())
-
+    val waterData by PreferenceDataStore.getWater(context).collectAsState(initial = 0)
     //Exercise, Personal, Food, Rest
 
     val responseText by geminiViewModel.responseText.collectAsState()
@@ -113,7 +113,7 @@ fun StatisticsScreen (
                     "Task: Provide improvement suggestions based on the given information. The given information is " +
                     "Personal (BMI : ${personalData?.bmi})\n" +
                     "Exercise (Active min : ${exerciseData})\n" +
-                    "Food (calories, water : ${foodData.sumOf {it.calories?.toInt() ?: 0 }})\n" +
+                    "Food (calories : ${foodData.sumOf {it.calories?.toInt() ?: 0 }}, water : ${waterData}L)\n" +
                     "Rest (sleep Hour : ${sleepData}, Rest Hour : ${restData}). When answering, use the title of each information above, \n" +
                     "Separate each with a space and provide 4 improvement suggestions. Never use special characters. When improvements to each data are completed and improvements to the next data are written, insert the / symbol."
         )
@@ -161,6 +161,8 @@ fun StatisticsScreen (
         Spacer(modifier = Modifier.height(16.dp))
 
         Food(
+            foodData.sumOf {it.calories?.toInt() ?: 0 },
+            water = waterData.toDouble(),
             description = foodDescription,
             onClick = {
                 navController.navigate("food")
@@ -432,7 +434,12 @@ fun Exercise(
 
 
 @Composable
-fun Food(description : String,  onClick : () -> Unit = {}) {
+fun Food(
+    calories : Int,
+    water : Double,
+    description : String,
+    onClick : () -> Unit = {}
+) {
     Column (
         modifier = Modifier
             .fillMaxWidth()
@@ -470,7 +477,7 @@ fun Food(description : String,  onClick : () -> Unit = {}) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text (
-                    text = "320",
+                    text = calories.toString(),
                     fontSize = 24.sp,
                     color = greenFoodColor2,
                     modifier = Modifier.padding(bottom = 2.dp)
@@ -490,7 +497,7 @@ fun Food(description : String,  onClick : () -> Unit = {}) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text (
-                    text = "2.5L",
+                    text = "${water}L",
                     fontSize = 24.sp,
                     color = greenFoodColor2,
                     modifier = Modifier.padding(bottom = 2.dp)
@@ -563,7 +570,7 @@ fun Rest(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text (
-                    text = "7",
+                    text = sleep.toString(),
                     fontSize = 24.sp,
                     color = purpleRestColor2,
                     modifier = Modifier.padding(bottom = 2.dp)
@@ -583,7 +590,7 @@ fun Rest(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text (
-                    text = "12",
+                    text = rest.toString(),
                     fontSize = 24.sp,
                     color = purpleRestColor2,
                     modifier = Modifier.padding(bottom = 2.dp)
