@@ -1,5 +1,6 @@
 package com.purang.hellofood.repositories
 
+import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
 import com.purang.hellofood.models.ScheduleData
 import jakarta.inject.Inject
@@ -10,7 +11,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 
 class ScheduleRepository @Inject constructor(private val firestore: FirebaseFirestore) {
-    private val scheduleCollection = firestore.collection("schedules")
+    //private val scheduleCollection = firestore.collection("schedules")
 
     // 연도와 월을 추가하여 해당하는 데이터만 가져오기
     /*fun getUserSchedules(userId: String, year: Int, month: Int): Flow<List<ScheduleData>> {
@@ -34,18 +35,43 @@ class ScheduleRepository @Inject constructor(private val firestore: FirebaseFire
         }
     }*/
     suspend fun getUserSchedules(userId: String, year: Int, month: Int): List<ScheduleData> {
-        val result = scheduleCollection
-            .whereEqualTo("userId", userId)
-            .whereEqualTo("year", year)
-            .whereEqualTo("month", month)
-            .get()
-            .await() // 비동기 작업을 동기적으로 변환
+        try {
+            Log.d("ScheduleRepository", "Fetching schedules: userId=$userId, year=$year, month=$month")
 
-        return result.documents.mapNotNull { it.toObject(ScheduleData::class.java) }
+            val scheduleCollection = firestore
+                .collection("users")
+                .document(userId)
+                .collection("schedules")
+
+            val result = scheduleCollection
+                .whereEqualTo("year", year)
+                .whereEqualTo("month", month)
+                .get()
+                .await()
+
+            val list = result.documents.mapNotNull {
+                val obj = it.toObject(ScheduleData::class.java)
+                Log.d("ScheduleRepository", "Fetched item: $obj")
+                obj
+            }
+
+            Log.d("ScheduleRepository", "Total fetched: ${list.size}")
+            return list
+        } catch (e: Exception) {
+            Log.e("ScheduleRepository", "Error fetching schedules", e)
+            return emptyList()
+        }
     }
+
+
 
     //스케줄 아이디로 가져오기
     suspend fun getUserScheduleById(userId: String, scheduleId: String): ScheduleData? {
+        val scheduleCollection = firestore
+            .collection("users")
+            .document(userId)
+            .collection("schedules")
+
         val result = scheduleCollection
             .whereEqualTo("userId", userId)
             .whereEqualTo("scheduleId", scheduleId)
@@ -61,6 +87,7 @@ class ScheduleRepository @Inject constructor(private val firestore: FirebaseFire
     //
     //userId → schedules 서브컬렉션 → scheduleId (문서)
     suspend fun addSchedule(schedule: ScheduleData): Boolean {
+        Log.e("ScheduleRepository", "Adding schedule: $schedule")
         return try {
             // Firestore에서 userId에 해당하는 유저 문서의 schedules 서브컬렉션에 스케줄 추가
             val userScheduleCollection = firestore.collection("users").document(schedule.userId).collection("schedules")

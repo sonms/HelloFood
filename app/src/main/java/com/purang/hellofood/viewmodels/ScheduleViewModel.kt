@@ -1,6 +1,7 @@
 package com.purang.hellofood.viewmodels
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
@@ -47,6 +48,8 @@ class ScheduleViewModel @Inject constructor(
         fun update() {
             val userId = _userId.value
             val selectedMonth = _selectedMonth.value
+            Log.d("ScheduleViewModel", "Trigger update - userId: $userId, selectedMonth: $selectedMonth")
+
             if (userId != null && selectedMonth != null) {
                 viewModelScope.launch {
                     val scheduleList = scheduleRepository.getUserSchedules(
@@ -54,14 +57,18 @@ class ScheduleViewModel @Inject constructor(
                         selectedMonth.year,
                         selectedMonth.monthValue
                     )
+                    Log.d("ScheduleViewModel", "Schedule data fetched: size=${scheduleList.size}")
                     postValue(scheduleList)
                 }
+            } else {
+                Log.w("ScheduleViewModel", "Skipping update: Missing userId or selectedMonth")
             }
         }
 
         addSource(_userId) { update() }
         addSource(_selectedMonth) { update() }
     }
+
 
 
 
