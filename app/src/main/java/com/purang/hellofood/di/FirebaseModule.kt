@@ -1,6 +1,7 @@
 package com.purang.hellofood.di
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.purang.hellofood.repositories.FoodLogRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,6 +14,12 @@ object FirebaseModule {
     @Provides
     @Singleton
     fun provideFireStore(): FirebaseFirestore {
-        return FirebaseFirestore.getInstance() // getInstance()를 여기서 한 번만 호출
+        return FirebaseFirestore.getInstance()
+    }
+
+    @Provides
+    @Singleton
+    fun provideFoodLogRepository(firestore: FirebaseFirestore): FoodLogRepository {
+        return FoodLogRepository(firestore)
     }
 }

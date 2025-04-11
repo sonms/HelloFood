@@ -14,7 +14,7 @@ data class HealthStats (
     val exerciseMinutes: Int?,
     val sleepHours: Float?,
     val weight: Float?,
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    val createdAt: String = LocalDateTime.now().toString()
 )
 /**
  * stats_id (INT, PK) – 통계 ID

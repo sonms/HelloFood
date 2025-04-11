@@ -13,7 +13,8 @@ data class ScheduleData(
     val year: Int = 0,  // 연도
     val month: Int = 0, // 월
     val eventType: String = "", // "운동", "식사", "건강검진", "복약"
+    val title : String = "",
     val description: String? = null,
-    val status: Boolean = false, // 일정 완료 여부
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    //val status: Boolean = false, // 일정 완료 여부
+    val createdAt: String = LocalDateTime.now().toString()
 )

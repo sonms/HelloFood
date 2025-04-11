@@ -1,26 +1,29 @@
 package com.purang.hellofood.models
 
 import android.os.Build
+import android.os.Parcelable
+import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
+import kotlinx.parcelize.Parcelize
 import java.time.LocalDateTime
 
+@Keep
+@Parcelize
 @RequiresApi(Build.VERSION_CODES.O)
-data class FoodLog (
-    val foodId: Int,
-    val userId: String,
-    val photoUrl: String?,
-    val foodName: String,
-    val calories: Float,
-    val carbohydrates: Float,
-    val proteins: Float,
-    val fats: Float,
-    val vitamin : Float,
-    val mineral : Float,
-    val water : Int,
-    val mealTime: String, // "아침", "점심", "저녁", "간식"
-    val createdAt: LocalDateTime = LocalDateTime.now()
-)
-
+data class FoodLog(
+    val foodId: Int = 0,
+    val userId: String = "",
+    val photoUrl: String? = null,
+    val foodName: String? = null,
+    val foodDescription: String? = null,
+    val calories: Float? = null,
+    val carbohydrates: Float? = null,
+    val proteins: Float? = null,
+    val fats: Float? = null,
+    val vitamin: Float? = null,
+    val water: Int? = null,
+    val createdAt: String = LocalDateTime.now().toString()
+) : Parcelable
 /** food_id (INT, PK) – 음식 기록 ID
 
 user_id (INT, FK) – 사용자 ID

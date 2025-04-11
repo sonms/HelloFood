@@ -13,7 +13,7 @@ data class UserPreference(
     val preferredFood: String?,
     val dislikedFood: String?,
     val allergies: String?,
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    val createdAt: String = LocalDateTime.now().toString()
 )
 
 /**
