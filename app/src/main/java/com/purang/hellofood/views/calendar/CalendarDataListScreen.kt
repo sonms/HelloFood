@@ -1,6 +1,7 @@
 package com.purang.hellofood.views.calendar
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,7 +35,11 @@ import androidx.navigation.NavController
 import com.purang.hellofood.R
 import com.purang.hellofood.models.ScheduleData
 import com.purang.hellofood.ui.theme.greenFoodColor1
+import com.purang.hellofood.utils.FirebaseUserManager
 import com.purang.hellofood.viewmodels.ScheduleViewModel
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -44,6 +49,22 @@ fun CalendarDataListScreen(
     scheduleViewModel: ScheduleViewModel = hiltViewModel()
 ) {
     val calendarData by scheduleViewModel.schedules.observeAsState(initial = emptyList())
+    val userId = FirebaseUserManager.userId.toString()
+
+    LaunchedEffect(userId) {
+        // 선택된 날짜에서 년-월 부분만 추출하여 YearMonth 객체 생성
+        val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val localDate = LocalDate.parse(selectedDate, dateFormatter)
+        val yearMonth = YearMonth.from(localDate)
+
+        // 또는 더 간단하게 문자열 조작으로 처리
+        // val yearMonth = YearMonth.parse(selectedDate.substring(0, 7))
+
+        scheduleViewModel.fetchEventsByMonth(yearMonth)
+        scheduleViewModel.fetchSchedules(userId)
+        Log.e("calendarData", calendarData.toString())
+    }
+
     var isDeleteDialogOpen by remember {
         mutableStateOf(false)
     }
@@ -54,7 +75,7 @@ fun CalendarDataListScreen(
 
     val filteredData by remember(selectedDate, calendarData) {
         derivedStateOf {
-            calendarData?.filter { it.date == selectedDate }
+            calendarData.filter { it.date == selectedDate }
         }
     }
 
