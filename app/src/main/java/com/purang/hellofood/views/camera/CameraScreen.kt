@@ -192,7 +192,7 @@ fun CameraScreen(
                     imageUri = selectedImage,
                     prompt = "Command: Photo Analysis\n" +
                             "\n" +
-                            "Task: When answering, write the name of the food, the approximate estimated nutrients per serving in g and mg units right next to the - symbol (calories, protein, fat, vitamin amount), and describe the improvement suggestions. Write them all in order, separated by commas and never use * and Please leave a space between numbers and letters, and respond with a space for suggestions for improvement. Be sure to follow this task"
+                            "Task: When answering, write the name of the food, the approximate estimated nutrients per serving in g and mg units right next to the - symbol (calories, protein, fat, vitamin amount), and describe the improvement suggestions. Write them all in order, separated by commas and never use * symbol and Please leave a space between numbers and letters, and respond with a space for suggestions for improvement. Please be sure to follow this order."
                 )
             } else {
                 isImageSelected = false
