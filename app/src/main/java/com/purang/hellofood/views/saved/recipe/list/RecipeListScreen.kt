@@ -17,7 +17,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.purang.hellofood.utils.FirebaseUserManager
 import com.purang.hellofood.viewmodels.FoodLogViewModel
-import com.purang.hellofood.views.saved.food.FoodItemUI
+import com.purang.hellofood.views.saved.recipe.RecipeItemUI
 
 @Composable
 fun RecipeListScreen(
@@ -37,7 +37,7 @@ fun RecipeListScreen(
             .padding(16.dp)
     ) {
         Text(
-            text = "Shopping List",
+            text = "Recipes List",
             modifier = Modifier.padding(bottom = 8.dp),
             fontWeight = FontWeight.Bold
         )
@@ -46,14 +46,14 @@ fun RecipeListScreen(
             itemsIndexed(
                 items = recipeList
             ) { _ , item ->
-                FoodItemUI(
+                RecipeItemUI (
                     item = item,
                     onClickItem = {
                         //음식이름으로 영양소 도출? todo
                         
                     },
                     onLongClickItem = {
-
+                        foodLogViewModel.deleteFoodItemRecipeToFireStore(it, userId)
                     }
                 )
             }
