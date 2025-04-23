@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 @Parcelize
 @RequiresApi(Build.VERSION_CODES.O)
 data class FoodLog(
-    val foodId: Int = 0,
+    var foodId: String = "0",
     val userId: String = "",
     val photoUrl: String? = null,
     val foodName: String? = null,

@@ -7,7 +7,7 @@ import kotlinx.parcelize.Parcelize
 @Keep
 @Parcelize
 data class FoodItem(
-    val foodId: Int? = 0,
+    var foodId: String? = "0",
     val userId: String? = "",
     val photoUrl: String? = "",
     val foodName: String? = "",
