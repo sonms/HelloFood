@@ -44,91 +44,6 @@ fun ScheduleScreen(
     navController: NavController,
     scheduleViewModel: ScheduleViewModel = hiltViewModel()
 ) {
-    /*val selectCalendarData by homeViewModel.clickCalendarData.observeAsState(emptyList())
-    val monthData by homeViewModel.sortedMonthEvents.observeAsState(emptyList())*/
-
-
-    //유저 데이터 가져오기
-    //val userMonthData by scheduleViewModel.schedules.observeAsState() //schedules.collectAsState(initial = emptyList())
-
-
-
-    // clickDateCalendarList 해당 selectDate에 맞는 일정으로 업데이트
-
-
-
-
-
-
-
-    /*Column(
-        modifier = Modifier.fillMaxSize().padding(10.dp)
-    ) {
-        LazyColumn(
-            modifier = Modifier.wrapContentSize()
-        ) {
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillParentMaxHeight()// 명시적으로 높이를 설정합니다.
-                ) {
-                    if (!isCollapsed) { // 스크롤을 내려서 접혀있는 상태에서는 표시 안 함
-                        ScheduleCalendar(
-                            modifier = Modifier.fillMaxWidth(),
-                            initialDate = ScheduleDate.create(YearMonth.now().year, YearMonth.now().monthValue, 1),
-                            schedules = calendarList,
-                            isMondayFirst = false,
-                            calendarColors = ScheduleCalendarDefaults.colors(
-                                lightColors = ScheduleCalendarDefaults.defaultLightColors().copy(
-                                    dayOfWeeks = blueColor5,
-                                    saturdayColor = blueExLight,
-                                    sundayColor = redInLight,
-                                    todayIndicatorColor = blueColor5,
-                                    dateScheduleTextColor = Color.White,
-                                    dateColor = blueColor5,
-                                ),
-                                darkColors = ScheduleCalendarDefaults.defaultDarkColors().copy(
-                                    dayOfWeeks = blueColor5,
-                                    saturdayColor = blueExLight,
-                                    sundayColor = redInLight,
-                                    todayIndicatorColor = blueColor5,
-                                    dateScheduleTextColor = Color.White,
-                                    dateColor = blueColor5
-                                ),
-                            ),
-                            onDayClick = { selectedDate ->
-                                val formattedMonth = String.format(Locale.getDefault(), "%02d", selectedDate.month)
-                                val formattedDate = String.format(Locale.getDefault(), "%02d", selectedDate.date)
-                                selectDate = "${selectedDate.year}-$formattedMonth-$formattedDate"
-                            },
-                            onPageChanged = { pageDate ->
-                                val formattedMonth = String.format(Locale.getDefault(), "%02d", pageDate.month)
-                                pageChangeDate = "${pageDate.year}-$formattedMonth"
-                            }
-                        )
-                    }
-                }
-            }
-
-            if (clickDateCalendarList?.isNotEmpty() == true) {
-                itemsIndexed(
-                    items = clickDateCalendarList!!
-                ) { _, item ->
-                    ScheduleItem(
-                        item = item,
-                        onItemClick = {
-                            navController.navigate("detail?schedule=${item.scheduleId}")
-                        },
-                        onItemLongClick = {
-                            deleteItem = it
-                            isDeleteDialogOpen = !isDeleteDialogOpen
-                        }
-                    )
-                }
-            }
-        }
-    }*/
     val pagerState = rememberPagerState(pageCount = { 2 }) // 2개의 페이지 (캘린더, 통계)
     val coroutineScope = rememberCoroutineScope()
 
@@ -149,7 +64,7 @@ fun ScheduleScreen(
                     },
                     text = {
                         Text(
-                            title,
+                            text = title,
                             color = if (pagerState.currentPage == index) greenFoodColor2 else Color.Gray
                         )
                     }
@@ -158,7 +73,10 @@ fun ScheduleScreen(
         }
 
         // 뷰페이저
-        ScheduleViewPager(pagerState, navController)
+        ScheduleViewPager(
+            pagerState,
+            navController
+        )
     }
 }
 

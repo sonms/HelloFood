@@ -116,7 +116,16 @@ class ScheduleViewModel @Inject constructor(
         viewModelScope.launch {
             val success = scheduleRepository.addSchedule(schedule)
             if (success) {
-                fetchSchedules(schedule.userId) // 일정 추가 후 데이터 다시 불러오기
+                fetchSchedules(schedule.userId)
+            }
+        }
+    }
+
+    fun editSchedule(schedule: ScheduleData) {
+        viewModelScope.launch {
+            val success = scheduleRepository.updateSchedule(schedule)
+            if (success) {
+                fetchSchedules(schedule.userId)
             }
         }
     }
@@ -125,7 +134,7 @@ class ScheduleViewModel @Inject constructor(
         viewModelScope.launch {
             val success = scheduleRepository.deleteSchedule(userId, scheduleId)
             if (success) {
-                fetchSchedules(userId) // 일정 삭제 후 데이터 다시 불러오기
+                fetchSchedules(userId)
             }
         }
     }

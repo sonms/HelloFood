@@ -108,6 +108,28 @@ class ScheduleRepository @Inject constructor(private val firestore: FirebaseFire
         }
     }
 
+    suspend fun updateSchedule(schedule: ScheduleData): Boolean {
+        return try {
+            val userScheduleCollection = firestore
+                .collection("users")
+                .document(schedule.userId)
+                .collection("schedules")
+
+            val scheduleId = schedule.scheduleId
+            if (scheduleId.isEmpty()) {
+                Log.e("ScheduleRepository", "Schedule ID is null or empty")
+                return false
+            }
+
+            userScheduleCollection.document(scheduleId).set(schedule).await()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
+
     suspend fun deleteSchedule(userId: String, scheduleId: String): Boolean {
         return try {
             // Firestore에서 해당 유저의 schedules 컬렉션에 있는 특정 scheduleId 문서를 삭제
