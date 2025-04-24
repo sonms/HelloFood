@@ -115,8 +115,8 @@ fun ExerciseScreen(
                             PreferenceDataStore.setGoalExercise(context, goalExercise = min.toInt())
                         }
                         //navController.navigate(BottomNavItem.Calendar.screenRoute)
-                        navController.navigate(BottomNavItem.Calendar.screenRoute) {
-                            popUpTo(BottomNavItem.Calendar.screenRoute) { inclusive = true }
+                        navController.navigate(BottomNavItem.Account.screenRoute) {
+                            popUpTo(BottomNavItem.Account.screenRoute) { inclusive = true }
                             launchSingleTop = true
                         }
                     }

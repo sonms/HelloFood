@@ -92,13 +92,17 @@ fun PersonalScreen(navController: NavController, type : String) {
                         coroutineScope.launch {
                             PreferenceDataStore.setGoalWeight(context, goalWeight = weight.toInt())
                         }
-                        navController.navigate(BottomNavItem.Calendar.screenRoute) {
-                            popUpTo(BottomNavItem.Calendar.screenRoute) { inclusive = true }
+                        navController.navigate(BottomNavItem.Account.screenRoute) {
+                            popUpTo(BottomNavItem.Account.screenRoute) { inclusive = true }
                             launchSingleTop = true
                         }
                     }
                 },
-                enabled = weight.isNotEmpty() && height.isNotEmpty(),
+                enabled = if (type != "goal") {
+                    weight.isNotEmpty() && height.isNotEmpty()
+                } else {
+                    weight.isNotEmpty()
+                },
                 modifier = Modifier.size(56.dp)
             ) {
                 Icon(Icons.Default.Check, contentDescription = "저장")
