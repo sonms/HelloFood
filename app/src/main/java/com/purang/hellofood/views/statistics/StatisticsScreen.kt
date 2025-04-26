@@ -59,6 +59,7 @@ import com.purang.hellofood.ui.theme.purpleRestColor3
 import com.purang.hellofood.ui.theme.redPersonalColor1
 import com.purang.hellofood.ui.theme.redPersonalColor2
 import com.purang.hellofood.ui.theme.redPersonalColor3
+import com.purang.hellofood.utils.FirebaseUserManager
 import com.purang.hellofood.utils.PreferenceDataStore
 import com.purang.hellofood.viewmodels.FoodLogViewModel
 import com.purang.hellofood.viewmodels.GeminiViewModel
@@ -74,6 +75,8 @@ fun StatisticsScreen (
     foodLogViewModel: FoodLogViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    val userId = FirebaseUserManager.userId.toString()
+
     val personalData by PreferenceDataStore.getUserData(context).collectAsState(initial = null)
     val exerciseData by PreferenceDataStore.getExerciseTime(context).collectAsState(initial = 0)
     val sleepData by PreferenceDataStore.getSleep(context).collectAsState(initial = 0)
@@ -85,6 +88,7 @@ fun StatisticsScreen (
 
     val responseText by geminiViewModel.responseText.collectAsState()
     val uiState by geminiViewModel.uiState.collectAsState()
+    val summary by foodLogViewModel.nutritionSummary.collectAsState()
 
     when (uiState) {
         is GeminiUiState.Loading -> LoadingState.show()
@@ -92,9 +96,13 @@ fun StatisticsScreen (
             //Text(text = responseText)
             //Log.e("SuccessAnaly", responseFoodLog.toString())
             LoadingState.hide()
-            geminiViewModel.fetchUIState(GeminiUiState.Initial)
+            //geminiViewModel.fetchUIState(GeminiUiState.Error(""))
         }
-        is GeminiUiState.Error -> Text("Error : $responseText")
+        is GeminiUiState.Error -> {
+            Text("Error : $responseText")
+            LoadingState.hide()
+            //Text("Error : $responseText")
+        }
 
         else -> {
             GeminiUiState.Initial
@@ -107,16 +115,19 @@ fun StatisticsScreen (
     val restDescription = responseText.split("/").getOrNull(3) ?: ""
 
     LaunchedEffect(Unit) {
-        LoadingState.show()
-        geminiViewModel.sendMessageWithText(
-            prompt = "Command: Status Analysis\n" +
-                    "Task: Provide improvement suggestions based on the given information. The given information is " +
-                    "Personal (BMI : ${personalData?.bmi})\n" +
-                    "Exercise (Active min : ${exerciseData})\n" +
-                    "Food (calories : ${foodData.sumOf {it.calories?.toInt() ?: 0 }}, water : ${waterData}L)\n" +
-                    "Rest (sleep Hour : ${sleepData}, Rest Hour : ${restData}). When answering, use the title of each information above, \n" +
-                    "Separate each with a space and provide 4 improvement suggestions. Never use special characters. When improvements to each data are completed and improvements to the next data are written, insert the / symbol."
-        )
+        foodLogViewModel.fetchMonthlyNutrition(userId)
+        if (uiState == GeminiUiState.Initial) {
+            LoadingState.show()
+            geminiViewModel.sendMessageWithText(
+                prompt = "Command: Status Analysis\n" +
+                        "Task: Provide improvement suggestions based on the given information. The given information is " +
+                        "Personal (BMI : ${personalData?.bmi})\n" +
+                        "Exercise (Active min : ${exerciseData})\n" +
+                        "Food (calories : ${foodData.sumOf {it.calories?.toInt() ?: 0 }}, water : ${waterData}L)\n" +
+                        "Rest (sleep Hour : ${sleepData}, Rest Hour : ${restData}). When answering, use the title of each information above, \n" +
+                        "Separate each with a space and provide 4 improvement suggestions. Never use special characters. When improvements to each data are completed and improvements to the next data are written, insert the / symbol."
+            )
+        }
     }
 
 

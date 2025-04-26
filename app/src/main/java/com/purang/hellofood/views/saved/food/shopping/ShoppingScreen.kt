@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.purang.hellofood.R
 import com.purang.hellofood.utils.FirebaseUserManager
 import com.purang.hellofood.viewmodels.FoodLogViewModel
 import com.purang.hellofood.viewmodels.GeminiViewModel
@@ -53,7 +54,7 @@ fun ShoppingScreen(
 
                     },
                     onLongClickItem = {
-
+                        foodLogViewModel.deleteFoodItemShoppingToFireStore(it, userId)
                     }
                 )
             }

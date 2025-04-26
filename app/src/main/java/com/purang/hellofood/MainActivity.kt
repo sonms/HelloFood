@@ -69,9 +69,9 @@ import com.purang.hellofood.ui.theme.mintColor5
 import com.purang.hellofood.utils.FirebaseUserManager
 import com.purang.hellofood.utils.FontSize
 import com.purang.hellofood.utils.PreferenceDataStore
+import com.purang.hellofood.viewmodels.FoodLogViewModel
 import com.purang.hellofood.viewmodels.GeminiViewModel
 import com.purang.hellofood.views.account.AccountScreen
-import com.purang.hellofood.views.detail.DetailScreen
 import com.purang.hellofood.views.calendar.CalendarDataListScreen
 import com.purang.hellofood.views.camera.CameraScreen
 import com.purang.hellofood.views.camera.analysis.AnalysisScreen
@@ -79,6 +79,8 @@ import com.purang.hellofood.views.home.HomeScreen
 import com.purang.hellofood.views.loading.GlobalLoadingScreen
 import com.purang.hellofood.views.login.LoginScreen
 import com.purang.hellofood.views.saved.SavedScreen
+import com.purang.hellofood.views.saved.food.shopping.ShoppingScreen
+import com.purang.hellofood.views.saved.recipe.list.RecipeListScreen
 import com.purang.hellofood.views.schedule.ScheduleScreen
 import com.purang.hellofood.views.schedule.edit.EditScreen
 import com.purang.hellofood.views.search.SearchScreen
@@ -146,7 +148,6 @@ fun MainContent() {
         bottomBar = {
             // 특정 라우트에서는 BottomNavigation을 숨깁니다.
             if (currentRoute !in listOf(
-                    "edit_financial?type={type}&id={id}",
                     "login",
                     "analysis"
                 )
@@ -160,11 +161,14 @@ fun MainContent() {
                     "edit?type={typeName}&scheduleId={id}",
                     "analysis",
                     "login",
-                    "personal",
+                    "personal?type={type}",
                     "search",
-                    "exercise",
+                    "exercise?type={type}",
                     "food",
-                    "rest"
+                    "rest?type={type}",
+                    "list?date={selectDate}",
+                    BottomNavItem.Account.screenRoute,
+                    BottomNavItem.Calendar.screenRoute
                 )
             ) {
                 Column {
@@ -422,6 +426,7 @@ fun NavigationGraph(navController: NavHostController) {
     val context = LocalContext.current
     val isLoggedIn by PreferenceDataStore.getLoginState(context).collectAsState(initial = false)
     val geminiViewModel: GeminiViewModel = hiltViewModel()
+    val foodLogViewModel: FoodLogViewModel = hiltViewModel()
 
     NavHost(
         navController = navController,
@@ -437,22 +442,50 @@ fun NavigationGraph(navController: NavHostController) {
         composable("analysis") {
             AnalysisScreen(navController = navController, geminiViewModel)
         }
-        composable("rest") {
-            RestScreen(navController)
+        composable(
+            route = "rest?type={type}",
+            arguments = listOf(navArgument("type") {
+                defaultValue = "default"
+            })
+        ) {
+            val type = it.arguments?.getString("type") ?: "default"
+            RestScreen(navController, type)
         }
 
-        composable("personal") {
-            PersonalScreen(navController)
+        composable(
+            route = "personal?type={type}",
+            arguments = listOf(navArgument("type") {
+                defaultValue = "default"
+                //type = NavType.StringType
+            })
+        ) {
+            val type = it.arguments?.getString("type") ?: "default"
+            PersonalScreen(navController, type)
         }
-        composable("exercise") {
-            ExerciseScreen(navController)
+
+        composable(
+            route = "exercise?type={type}",
+            arguments = listOf(navArgument("type") {
+                defaultValue = "default"
+                //type = NavType.StringType
+            })
+        ) {
+            val type = it.arguments?.getString("type") ?: "default"
+            ExerciseScreen(navController, type)
         }
+
         composable("food") {
             FoodManageScreen(navController, geminiViewModel)
         }
-        composable("rest") {
-            PersonalScreen(navController)
+        composable("shopping") {
+            ShoppingScreen(navController, foodLogViewModel)
         }
+        composable("recipe") {
+            RecipeListScreen(navController, foodLogViewModel)
+        }
+        /*composable("rest") {
+            PersonalScreen(navController)
+        }*/
 
         composable(BottomNavItem.Home.screenRoute) {
             HomeScreen(navController)
@@ -461,7 +494,7 @@ fun NavigationGraph(navController: NavHostController) {
             ScheduleScreen(navController)
         }
         composable(BottomNavItem.Saved.screenRoute) {
-            SavedScreen(navController)
+            SavedScreen(navController, foodLogViewModel)
         }
         composable(BottomNavItem.Camera.screenRoute) {
             CameraScreen(navController, geminiViewModel)
@@ -470,7 +503,7 @@ fun NavigationGraph(navController: NavHostController) {
             //InterestSelectionScreen(navController)
             AccountScreen(navController)
         }
-        composable(
+        /*composable(
             route = "detail?schedule={id}",
             arguments = listOf(
                 navArgument("id") { defaultValue = "-1" }
@@ -479,7 +512,7 @@ fun NavigationGraph(navController: NavHostController) {
             val id = backStackEntry.arguments?.getString("id") ?: "-1"
 
             DetailScreen(navController, id = id)
-        }
+        }*/
         composable(
             route = "edit?type={typeName}&scheduleId={id}",
             arguments = listOf(
@@ -499,7 +532,7 @@ fun NavigationGraph(navController: NavHostController) {
             )
         ) { backStackEntry ->
             val selectDate = backStackEntry.arguments?.getString("selectDate") ?: "default"
-
+            Log.e("selectedDate", selectDate)
             CalendarDataListScreen(navController, selectedDate = selectDate)
         }
 
