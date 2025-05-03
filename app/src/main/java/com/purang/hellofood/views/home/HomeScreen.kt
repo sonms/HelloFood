@@ -5,14 +5,15 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,17 +24,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.purang.hellofood.R
+import com.purang.hellofood.models.FoodLog
 import com.purang.hellofood.models.HealthTipData
 import com.purang.hellofood.models.HealthTips
 import com.purang.hellofood.utils.FirebaseUserManager
@@ -41,8 +43,8 @@ import com.purang.hellofood.utils.FontSize
 import com.purang.hellofood.utils.PreferenceDataStore
 import com.purang.hellofood.utils.FontUtils
 import com.purang.hellofood.viewmodels.ScheduleViewModel
-import com.purang.hellofood.views.calendar.DeleteItemDialog
 import com.purang.hellofood.views.calendar.ScheduleItem
+import com.purang.hellofood.views.schedule.DeleteItemDialog
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -91,7 +93,7 @@ fun HomeScreen(
 
 
 
-    //- 최근 측정 건강 통계
+    //- 최근 측정 건강 통계 -> 최근 분석한 음식
     //- 건강 팁
     //- 오늘 할일 스케줄
 
@@ -107,23 +109,49 @@ fun HomeScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
+
             item {
                 HealthTip(healthTipData,fontSize)
             }
 
-            itemsIndexed(
-                items = todayScheduleList ?: emptyList()
-            ) { _, item ->
-                ScheduleItem(
-                    item = item,
-                    onItemClick = {
-                        navController.navigate("detail?schedule=${item.scheduleId}")
-                    },
-                    onItemLongClick = {
-                        deleteItem = it
-                        isDeleteDialogOpen = !isDeleteDialogOpen
-                    }
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = "Today's Schedule",
+                    fontWeight = FontWeight.Bold,
+                    style = FontUtils.getTextStyle(fontSize.size + 4f)
                 )
+            }
+
+            if (todayScheduleList.isNullOrEmpty()) {
+                item {
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Text(
+                        text = "Empty Schedule \n Register your schedule!",
+                        fontWeight = FontWeight.Bold,
+                        style = FontUtils.getTextStyle(fontSize.size + 4f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
+            } else {
+                itemsIndexed(
+                    items = todayScheduleList ?: emptyList()
+                ) { _, item ->
+                    ScheduleItem(
+                        item = item,
+                        onItemClick = {
+                            navController.navigate("edit?type=edit&scheduleId=${item.scheduleId}")
+                        },
+                        onItemLongClick = {
+                            deleteItem = it
+                            isDeleteDialogOpen = !isDeleteDialogOpen
+                        }
+                    )
+                }
             }
         }
     }
@@ -174,4 +202,11 @@ fun HealthTip(healthTipData: HealthTipData?, fontSize: FontSize) {
             )
         }
     }
+}
+
+@Composable
+fun CurrentDataUI(
+   item : FoodLog
+) {
+
 }

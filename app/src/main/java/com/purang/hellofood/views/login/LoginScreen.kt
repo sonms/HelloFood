@@ -30,10 +30,7 @@ import com.purang.hellofood.BottomNavItem
 import com.purang.hellofood.R
 import com.purang.hellofood.ui.theme.greenFoodColor2
 import com.purang.hellofood.utils.CredentialManagerProvider
-import com.purang.hellofood.utils.FirebaseUserManager
-import com.purang.hellofood.utils.PreferenceDataStore
-import com.purang.hellofood.viewmodels.LoginViewModel
-import com.purang.hellofood.views.camera.analysis.saveFoodLogToFireStore
+
 import kotlinx.coroutines.launch
 
 sealed class ApiState {
@@ -84,7 +81,8 @@ fun LoginScreen(
                         contentDescription = "Google Sign In",
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
+                            .weight(1f)
+                            .padding(start = 16.dp, end = 16.dp, bottom = 24.dp)
                             .clickable {
                                 coroutineScope.launch {
                                     loginState = ApiState.Loading
