@@ -8,8 +8,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,7 +41,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -244,10 +248,10 @@ fun ScheduleItem(
     onItemLongClick : (com.purang.hellofood.models.ScheduleData) -> Unit
 ) {
     val color = when (item.eventType) {
-        "운동" -> blueColor5
-        "식사" -> mintColor4
-        "병원" -> redInLight
-        "복약" -> yellow
+        "Exercise" -> blueExercise2
+        "Food" -> greenFoodColor2
+        "Personal" -> redPersonalColor2
+        "Rest" -> purpleRestColor2
         else -> Color.Gray
     }
 
@@ -267,20 +271,24 @@ fun ScheduleItem(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 4.dp,
             pressedElevation = 8.dp
-        ), // 약간의 그림자
+        ),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         ),
 
         ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp), // 카드 내의 여백
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .height(IntrinsicSize.Min), // 카드 내의 여백
             verticalAlignment = Alignment.CenterVertically
         ) {
             // 좌측 색상 표시
             Box(
                 modifier = Modifier
-                    .size(8.dp)
+                    .width(5.dp)
+                    .fillMaxHeight()
                     .background(color = color)
             )
 
@@ -291,12 +299,26 @@ fun ScheduleItem(
                 modifier = Modifier.weight(1f) // 나머지 공간을 차지
             ) {
                 // 제목
-                Text(
-                    text = item.eventType,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    fontWeight = FontWeight.Bold
-                )
+                Row (
+                    modifier = Modifier.fillMaxWidth()
+                ){
+                    Text(
+                        text = item.title,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontWeight = FontWeight.Bold,
+                        color = color
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Text(
+                        text = item.eventType,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
 
                 // 내용
                 Spacer(modifier = Modifier.height(4.dp))

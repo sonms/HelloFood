@@ -37,6 +37,7 @@ import com.purang.hellofood.models.ScheduleData
 import com.purang.hellofood.ui.theme.greenFoodColor1
 import com.purang.hellofood.utils.FirebaseUserManager
 import com.purang.hellofood.viewmodels.ScheduleViewModel
+import com.purang.hellofood.views.schedule.DeleteItemDialog
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -115,5 +116,18 @@ fun CalendarDataListScreen(
                 )
             }
         }
+    }
+
+    if (isDeleteDialogOpen && deleteItem != null) {
+        DeleteItemDialog(
+            item = deleteItem!!,
+            onConfirmClick = {
+                isDeleteDialogOpen = !isDeleteDialogOpen
+                scheduleViewModel.deleteSchedule(it!!.scheduleId, userId)
+            },
+            onCancelClick = {
+                isDeleteDialogOpen = !isDeleteDialogOpen
+            }
+        )
     }
 }

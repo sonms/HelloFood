@@ -166,6 +166,11 @@ fun AnalysisScreen ( //음식 분석 정보 확인
                                 val userId = FirebaseUserManager.userId.toString()
                                 foodLogViewModel.saveFoodLogToFireStore(navController, foodLog, userId)
                             }
+                            navController.navigate(BottomNavItem.Camera.screenRoute) {
+                                popUpTo(navController.graph.startDestinationId) { inclusive = false }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(16.dp),
