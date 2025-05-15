@@ -12,7 +12,7 @@ val Pink40 = Color(0xFF7D5260)
 
 val TextColorGray = Color(0xFF4B5563)
 
-val blueColor1 = Color(0xFFF2F7FF)
+val blueColor1 = Color(0xFFCACBCC)
 val blueColor2 = Color(0xFFE4F0FF)
 val blueColor3 = Color(0xFFD7E8FE)
 val blueColor4 = Color(0xFFC9E0FE)
@@ -55,6 +55,8 @@ val purpleRestColor3 = Color(0xFFF5F3FF)
 
 val orange = validateColor(Color(0xFFFF9800))
 val yellow = validateColor(Color(0xFFFFEB3B))
+val yellowBackGround = validateColor(Color(0xFFFFFBEB))
+val textYellow = Color(0xFFB45309)
 val green = validateColor(Color(0xFF4CAF50))
 
 fun validateColor(color: Color): Color {
