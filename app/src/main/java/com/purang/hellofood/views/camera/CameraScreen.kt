@@ -22,13 +22,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,7 +45,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -59,9 +54,7 @@ import com.purang.hellofood.models.FoodLog
 import com.purang.hellofood.ui.theme.TextColorGray
 import com.purang.hellofood.ui.theme.blueExercise2
 import com.purang.hellofood.ui.theme.greenFoodColor1
-import com.purang.hellofood.ui.theme.greenFoodColor2
 import com.purang.hellofood.ui.theme.greenFoodColor3
-import com.purang.hellofood.ui.theme.mintColor3
 import com.purang.hellofood.utils.FirebaseUserManager
 import com.purang.hellofood.viewmodels.GeminiViewModel
 import com.purang.hellofood.views.camera.analysis.GeminiUiState
@@ -192,7 +185,16 @@ fun CameraScreen(
                     imageUri = selectedImage,
                     prompt = "Command: Photo Analysis\n" +
                             "\n" +
-                            "Task: When answering, write the name of the food, the approximate estimated nutrients per serving in g and mg units right next to the - symbol (calories, protein, fat, vitamin amount), and describe the improvement suggestions. Write them all in order, separated by commas and never use * symbol and Please leave a space between numbers and letters, and respond with a space for suggestions for improvement. Please be sure to follow this order."
+                            "Task : When answering by command, please follow the following\n" +
+                            "\n" +
+                            "Food name:\n" +
+                            "Calories, ?/\n" +
+                            "Protein, ?/\n" +
+                            "Fat, ?/\n" +
+                            "Vitamins, ?/\n" +
+                            "Improvements for this food.\n" +
+                            "\n" +
+                            "Never change the above answering method. In the ?, indicate the number of nutrients in one serving of the food analyzed, and add / to indicate the following, and do not use any symbols other than those I have mentioned. Please follow this order."
                 )
             } else {
                 isImageSelected = false
@@ -497,7 +499,7 @@ fun parseFoodLogFromText(text: String, userId: String, photoUrl: String? = null)
         ?: "No suggestions found"
 
     return FoodLog(
-        foodId = 0,
+        foodId = "0",
         userId = userId,
         photoUrl = photoUrl,
         foodName = foodName,
@@ -512,31 +514,9 @@ fun parseFoodLogFromText(text: String, userId: String, photoUrl: String? = null)
     )
 }
 
+/*
 @RequiresApi(Build.VERSION_CODES.O)
-fun parseCondensedFoodLogFormat(text: String, userId: String, photoUrl: String? = null): FoodLog? {
-    /*val formatCheck = Regex("""^[\w\s]+-\s*\d+.*calories""", RegexOption.IGNORE_CASE)
-    if (!formatCheck.containsMatchIn(text)) return null
-
-    val namePattern = Regex("""^([^-]+)-""")
-    val caloriePattern = Regex("""(\d+)\s*calories""", RegexOption.IGNORE_CASE)
-    val proteinPattern = Regex("""(\d+)\s*g\s*protein""", RegexOption.IGNORE_CASE)
-    val fatPattern = Regex("""(\d+)\s*g\s*fat""", RegexOption.IGNORE_CASE)
-    val vitaminCPattern = Regex("""(\d+)\s*mg\s*vitamin\s*C""", RegexOption.IGNORE_CASE)
-    val improvementPattern = Regex("""Improvement\s*-\s*(.*)""", RegexOption.IGNORE_CASE)
-
-    val foodName = namePattern.find(text)?.groups?.get(1)?.value?.trim() ?: "Unnamed Food"
-    val calories = caloriePattern.find(text)?.groups?.get(1)?.value?.toFloatOrNull()
-    val proteins = proteinPattern.find(text)?.groups?.get(1)?.value?.toFloatOrNull()
-    val fats = fatPattern.find(text)?.groups?.get(1)?.value?.toFloatOrNull()
-    val vitaminC = vitaminCPattern.find(text)?.groups?.get(1)?.value?.toFloatOrNull()
-    *//*val vitaminC = improvementPattern
-        .findAll(text)
-        .mapNotNull { it.groups[1]?.value?.toFloatOrNull() }
-        ?.average()
-        ?.toFloat()*//*
-    val description = improvementPattern.find(text)?.groups?.get(1)?.value?.trim()
-        ?: "No improvement suggestions found"*/
-
+fun parseCondensedFoodLogFormat(text: String, userId: String, photoUrl: String? = null): FoodLog {
     val foodName = text.split("-").first()
     val calories = text.split("-").last().split(",").first()
     val caloriesFormat = Regex("""\d+(\.\d+)?""").find(calories)?.value?.toFloatOrNull()
@@ -560,7 +540,7 @@ fun parseCondensedFoodLogFormat(text: String, userId: String, photoUrl: String? 
     Log.e("foodName", foodName)
 
     return FoodLog(
-        foodId = 0,
+        foodId = "0",
         userId = userId,
         photoUrl = photoUrl,
         foodName = foodName,
@@ -570,6 +550,59 @@ fun parseCondensedFoodLogFormat(text: String, userId: String, photoUrl: String? 
         proteins = proteinsFormat,
         fats = fatsFormat,
         vitamin = vitaminCFormat,
+        water = null,
+        createdAt = LocalDateTime.now().toString()
+    )
+}*/
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun parseCondensedFoodLogFormat(text: String, userId: String, photoUrl: String? = null): FoodLog {
+    val lines = text.lines().map { it.trim() }.filter { it.isNotEmpty() }
+
+    val foodName = lines.firstOrNull { it.startsWith("Food name:", true) }
+        ?.substringAfter("Food name:", "")
+        ?.trim()
+        ?: "Unknown"
+
+    val calories = lines.firstOrNull { it.startsWith("Calories", true) }
+        ?.let { Regex("""\d+(\.\d+)?""").find(it)?.value?.toFloatOrNull() }
+
+    val proteins = lines.firstOrNull { it.startsWith("Protein", true) }
+        ?.let { Regex("""\d+(\.\d+)?""").find(it)?.value?.toFloatOrNull() }
+
+    val fats = lines.firstOrNull { it.startsWith("Fat", true) }
+        ?.let { Regex("""\d+(\.\d+)?""").find(it)?.value?.toFloatOrNull() }
+
+    val vitamins = lines.firstOrNull { it.startsWith("Vitamins", true) }
+        ?.let {
+            val value = Regex("""\d+(\.\d+)?""").find(it)?.value?.toFloatOrNull()
+            if (value != null) value else if (it.lowercase().contains("negligible")) 0f else null
+        }
+
+    val improvementDescription = lines.firstOrNull { it.startsWith("Improvements", ignoreCase = true) }
+        ?.substringAfter(":")
+        ?.trim()
+        ?: ""
+
+    val fullDescription = buildString {
+        append("Calories: ${calories ?: "N/A"}, ")
+        append("Protein: ${proteins ?: "N/A"}, ")
+        append("Fat: ${fats ?: "N/A"}, ")
+        append("Vitamins: ${vitamins ?: "N/A"}.\n")
+        append("Improvement: $improvementDescription")
+    }
+
+    return FoodLog(
+        foodId = "0",
+        userId = userId,
+        photoUrl = photoUrl,
+        foodName = foodName,
+        foodDescription = fullDescription,
+        calories = calories,
+        carbohydrates = null,
+        proteins = proteins,
+        fats = fats,
+        vitamin = vitamins,
         water = null,
         createdAt = LocalDateTime.now().toString()
     )
