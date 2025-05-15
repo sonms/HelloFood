@@ -13,7 +13,7 @@ data class AgricultureRecommendation (
     val nutritionalValue: String?,
     val origin: String?, // 원산지
     val sustainabilityScore: Float?, // 환경 친화적 등급
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    val createdAt: String = LocalDateTime.now().toString()
 )
 
 /**
