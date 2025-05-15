@@ -63,6 +63,9 @@ class GeminiViewModel @Inject constructor(
     private val _responseText = MutableStateFlow("")
     val responseText = _responseText.asStateFlow()
 
+    private val _responseRecipeText = MutableStateFlow("")
+    val responseRecipeText = _responseRecipeText.asStateFlow()
+
     private val _responseFoodLog = MutableStateFlow<FoodLog?>(null)
     val responseFoodLog = _responseFoodLog.asStateFlow()
 
@@ -257,6 +260,64 @@ class GeminiViewModel @Inject constructor(
 
             } catch (e: Exception) {
                 _responseText.value = "Error: ${e.localizedMessage}"
+                //Log.e("_responseText e", _responseText.value)
+                _uiState.value = GeminiUiState.Error(e.localizedMessage ?: "An error occurred")
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun sendMessageWithTextRecipe(prompt: String) {
+        _uiState.value = GeminiUiState.Loading
+
+        viewModelScope.launch {
+            try {
+                val geminiApiKey = BuildConfig.GEMINI_API
+
+                val safetySettings = listOf(
+                    SafetySetting(HarmCategory.HARASSMENT, BlockThreshold.MEDIUM_AND_ABOVE),
+                    SafetySetting(HarmCategory.HATE_SPEECH, BlockThreshold.MEDIUM_AND_ABOVE),
+                    SafetySetting(HarmCategory.SEXUALLY_EXPLICIT, BlockThreshold.MEDIUM_AND_ABOVE),
+                    SafetySetting(HarmCategory.DANGEROUS_CONTENT, BlockThreshold.MEDIUM_AND_ABOVE)
+                )
+
+                val generativeModel = GenerativeModel(
+                    modelName = "gemini-2.0-flash", // or gemini-1.0-pro, depending on need
+                    apiKey = geminiApiKey,
+                    safetySettings = safetySettings
+                )
+
+                val content = content {
+                    text(prompt)
+                }
+
+                val response = generativeModel.generateContent(content)
+                val candidate = response.candidates.firstOrNull()
+                val finishReason = candidate?.finishReason
+
+                when (finishReason) {
+                    FinishReason.STOP,
+                    FinishReason.MAX_TOKENS,
+                    FinishReason.RECITATION,
+                    FinishReason.OTHER,
+                    null -> {
+                        _responseRecipeText.value = response.text ?: "No response received"
+                        _uiState.value = GeminiUiState.Success
+                        Log.e("_responseRecipeText n", _responseRecipeText.value)
+                    }
+                    FinishReason.SAFETY -> {
+                        _responseRecipeText.value = "Your response was blocked by a security filter"
+                        _uiState.value = GeminiUiState.Error("Blocked by a security filter")
+                        //Log.e("_responseText s", _responseText.value)
+                    }
+
+                    else -> {
+
+                    }
+                }
+
+            } catch (e: Exception) {
+                _responseRecipeText.value = "Error: ${e.localizedMessage}"
                 //Log.e("_responseText e", _responseText.value)
                 _uiState.value = GeminiUiState.Error(e.localizedMessage ?: "An error occurred")
             }
